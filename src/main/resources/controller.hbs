@@ -1,0 +1,23 @@
+package {{packageName}};
+
+import com.echo.v1.EchoRequest;
+import com.echo.v1.EchoResponse;
+import com.echo.v1.EchoServiceGrpc;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class {{serviceName}}Proxy {
+
+    {{stubClass}} stub;
+
+    public {{serviceName}}Proxy({{stubClass}} stub) {
+        this.stub = stub;
+    }
+
+    {{#rpcList}}
+    @{{httpMethod}}("{{httpPath}}")
+    {{out}} {{methodName}}({{in}} request) {
+        return stub.{{methodName}}(request);
+    }
+    {{/rpcList}}
+}

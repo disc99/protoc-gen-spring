@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -jar /Users/ar-mac-005/src/github.com/disc99/grpc-spring-proxy/build/libs/grpc-spring-proxy-all.jar

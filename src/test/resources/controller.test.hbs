@@ -1,0 +1,21 @@
+package echo.v1;
+
+import com.echo.v1.EchoRequest;
+import com.echo.v1.EchoResponse;
+import com.echo.v1.EchoServiceGrpc;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class EchoServiceProxy {
+
+    EchoServiceGrpc.EchoServiceBlockingStub stub;
+
+    public EchoServiceProxy(EchoServiceGrpc.EchoServiceBlockingStub stub) {
+        this.stub = stub;
+    }
+
+    @PostMapping("/echo.v1.EchoService.EchoRequest")
+    EchoResponse getEcho(EchoRequest request) {
+        return stub.getEcho(request);
+    }
+}

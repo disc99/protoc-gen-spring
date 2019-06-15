@@ -1,6 +1,7 @@
 package io.disc99.protoc.gen.spring;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -8,8 +9,14 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.github.jknack.handlebars.EscapingStrategy;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import io.disc99.protoc.gen.spring.generator.*;
 import io.disc99.protoc.gen.spring.method.MethodGenerator;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.ST;
@@ -48,7 +55,15 @@ class Generator extends ProtocPluginCodeGenerator {
     @Override
     @Nonnull
     protected String generateImports() {
-        return SpringRestTemplates.imports();
+//        return SpringRestTemplates.imports();
+        return template("imports").text();
+    }
+
+    @SneakyThrows // TODO
+    Template template(String file) {
+        TemplateLoader loader = new ClassPathTemplateLoader();
+        Handlebars handlebars = new Handlebars(loader).prettyPrint(true).with(EscapingStrategy.NOOP);
+        return handlebars.compile(file);
     }
 
     /**
@@ -81,18 +96,29 @@ class Generator extends ProtocPluginCodeGenerator {
      */
     @Override
     @Nonnull
+    @SneakyThrows // TODO
     protected Optional<String> generateServiceCode(@Nonnull final ServiceDescriptor serviceDescriptor) {
         final String responseWrapper = serviceDescriptor.getName() + "Response";
 
-        return Optional.of(SpringRestTemplates.service()
-                .add("serviceName", serviceDescriptor.getName())
-                .add("responseWrapper", responseWrapper)
-                .add("package", serviceDescriptor.getJavaPkgName())
-                .add("methodDefinitions", serviceDescriptor.getMethodDescriptors().stream()
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("serviceName", serviceDescriptor.getName());
+        context.put("responseWrapper", responseWrapper);
+        context.put("package", serviceDescriptor.getJavaPkgName());
+        context.put("methodDefinitions", serviceDescriptor.getMethodDescriptors().stream()
                         .map(serviceMethodDescriptor -> new MethodGenerator(serviceDescriptor,
                                 serviceMethodDescriptor, responseWrapper).generateCode())
-                        .collect(Collectors.toList()))
-                .render());
+                        .collect(Collectors.toList()));
+        return Optional.of(template("service").apply(context));
+
+//        return Optional.of(SpringRestTemplates.service()
+//                .add("serviceName", serviceDescriptor.getName())
+//                .add("responseWrapper", responseWrapper)
+//                .add("package", serviceDescriptor.getJavaPkgName())
+//                .add("methodDefinitions", serviceDescriptor.getMethodDescriptors().stream()
+//                        .map(serviceMethodDescriptor -> new MethodGenerator(serviceDescriptor,
+//                                serviceMethodDescriptor, responseWrapper).generateCode())
+//                        .collect(Collectors.toList()))
+//                .render());
     }
 
     /**

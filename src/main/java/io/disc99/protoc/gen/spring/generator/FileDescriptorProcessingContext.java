@@ -11,12 +11,18 @@
  */
 package io.disc99.protoc.gen.spring.generator;
 
+import com.github.jknack.handlebars.EscapingStrategy;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import com.google.common.base.CaseFormat;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.protobuf.DescriptorProtos.*;
 import com.google.protobuf.DescriptorProtos.SourceCodeInfo.Location;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -150,7 +156,40 @@ class FileDescriptorProcessingContext {
     }
 
     @Nonnull
+    @SneakyThrows // TODO remove
     public File generateFile() {
+        TemplateLoader loader = new ClassPathTemplateLoader();
+        Handlebars handlebars = new Handlebars(loader).prettyPrint(true).with(EscapingStrategy.NOOP);
+
+//        Template template = handlebars.compile("file");
+//        HashMap<String, Object> context = new HashMap<>();
+//        context.put("pluginName", generator.getPluginName());
+//        context.put("imports", generator.generateImports());
+//        context.put("protoSourceName", fileDescriptorProto.getName());
+//        context.put("pkgName", javaPkg);
+//        context.put("outerClassName", outerClass.getPluginJavaClass());
+//        context.put("messageCode", fileDescriptorProto.getMessageTypeList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()));
+//        context.put("enumCode", fileDescriptorProto.getEnumTypeList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()));
+//        context.put("serviceCode", fileDescriptorProto.getServiceList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()));
+
+
+//        final String generatedFile = template.apply(context);
+
 
         final String generatedFile = Templates.file()
                 .add("pluginName", generator.getPluginName())

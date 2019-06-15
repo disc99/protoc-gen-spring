@@ -1,0 +1,22 @@
+@Api(value="/{{serviceName}}")
+@RestController
+public static class {{serviceName}}Controller {
+    @ApiModel(description="Wrapper around the responses from {{serviceName}} to provide optional error information.")
+    public static class {{responseWrapper}}<T> {
+        @ApiModelProperty("If present, the response from the method call. Null IFF error is present.")
+        public final T response;
+        @ApiModelProperty("If present, the error encountered during the method call. Null IFF response is present.")
+        public final String error;
+        private {{responseWrapper}}() { response = null; error = null; }
+        private {{responseWrapper}}(T response, String error) { this.response = response; this.error = error; }
+        static <T> {{responseWrapper}} success(T response) { return new {{responseWrapper}}(response, null); }
+        static <T> {{responseWrapper}} error(String error) { return new {{responseWrapper}}(null, error); }
+    }
+
+    private {{package}}.{{serviceName}}Grpc.{{serviceName}}ImplBase service;
+    public {{serviceName}}Controller({{package}}.{{serviceName}}Grpc.{{serviceName}}ImplBase service) {
+        this.service = service;
+    }
+
+    {{#methodDefinitions}}{{.}}{{/methodDefinitions}}
+}

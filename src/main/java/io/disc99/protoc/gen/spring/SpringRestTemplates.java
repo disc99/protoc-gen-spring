@@ -26,9 +26,9 @@ import org.stringtemplate.v4.ST;
 public class SpringRestTemplates {
     private SpringRestTemplates() {}
 
-    public static ST service() {
-        return new ST(SERVICE_TEMPLATE);
-    }
+//    public static ST service() {
+//        return new ST(SERVICE_TEMPLATE);
+//    }
 
     public static ST serviceMethod() {
         return new ST(SERVICE_METHOD_TEMPLATE);
@@ -54,65 +54,65 @@ public class SpringRestTemplates {
         return new ST(ADD_FIELD_TO_PROTO_BUILDER_TEMPLATE);
     }
 
-    public static String imports() {
-        return IMPORTS;
-    }
+//    public static String imports() {
+//        return IMPORTS;
+//    }
+//
+//    private static final String IMPORTS =
+//            "import java.util.Map;" +
+//            "import java.util.List;" +
+//            "import com.google.gson.annotations.SerializedName;" +
+//            "import com.fasterxml.jackson.annotation.JsonProperty;" +
+//            "import com.google.protobuf.ByteString;" +
+//            "import java.util.stream.Collectors;" +
+//            "import io.swagger.annotations.ApiModel;" +
+//            "import io.swagger.annotations.ApiModelProperty;" +
+//            "import org.springframework.http.MediaType;" +
+//            "import org.springframework.http.ResponseEntity;" +
+//            "import org.springframework.web.bind.annotation.PathVariable;" +
+//            "import org.springframework.web.bind.annotation.RequestParam;" +
+//            "import org.springframework.web.bind.annotation.RequestBody;" +
+//            "import org.springframework.web.bind.annotation.RequestMapping;" +
+//            "import org.springframework.web.bind.annotation.RequestMethod;" +
+//            "import io.grpc.ManagedChannel;" +
+//            "import io.swagger.annotations.Api;" +
+//            "import io.swagger.annotations.ApiModel;" +
+//            "import io.swagger.annotations.ApiModelProperty;" +
+//            "import io.swagger.annotations.ApiOperation;" +
+//            "import java.util.stream.Stream;" +
+//            "import java.util.stream.StreamSupport;" +
+//            "import io.grpc.StatusRuntimeException;" +
+//            "import org.springframework.http.HttpStatus;" +
+//            "import io.grpc.Status;" +
+//            "import io.grpc.Status.Code;" +
+//            "import io.grpc.stub.StreamObserver;" +
+//            "import java.util.concurrent.LinkedBlockingQueue;" +
+//            "import java.util.ArrayList;" +
+//            "import org.springframework.beans.factory.annotation.Autowired;" +
+//            "import org.springframework.web.bind.annotation.RestController;";
 
-    private static final String IMPORTS =
-            "import java.util.Map;" +
-            "import java.util.List;" +
-            "import com.google.gson.annotations.SerializedName;" +
-            "import com.fasterxml.jackson.annotation.JsonProperty;" +
-            "import com.google.protobuf.ByteString;" +
-            "import java.util.stream.Collectors;" +
-            "import io.swagger.annotations.ApiModel;" +
-            "import io.swagger.annotations.ApiModelProperty;" +
-            "import org.springframework.http.MediaType;" +
-            "import org.springframework.http.ResponseEntity;" +
-            "import org.springframework.web.bind.annotation.PathVariable;" +
-            "import org.springframework.web.bind.annotation.RequestParam;" +
-            "import org.springframework.web.bind.annotation.RequestBody;" +
-            "import org.springframework.web.bind.annotation.RequestMapping;" +
-            "import org.springframework.web.bind.annotation.RequestMethod;" +
-            "import io.grpc.ManagedChannel;" +
-            "import io.swagger.annotations.Api;" +
-            "import io.swagger.annotations.ApiModel;" +
-            "import io.swagger.annotations.ApiModelProperty;" +
-            "import io.swagger.annotations.ApiOperation;" +
-            "import java.util.stream.Stream;" +
-            "import java.util.stream.StreamSupport;" +
-            "import io.grpc.StatusRuntimeException;" +
-            "import org.springframework.http.HttpStatus;" +
-            "import io.grpc.Status;" +
-            "import io.grpc.Status.Code;" +
-            "import io.grpc.stub.StreamObserver;" +
-            "import java.util.concurrent.LinkedBlockingQueue;" +
-            "import java.util.ArrayList;" +
-            "import org.springframework.beans.factory.annotation.Autowired;" +
-            "import org.springframework.web.bind.annotation.RestController;";
-
-    private static final String SERVICE_TEMPLATE =
-        "@Api(value=\"/<serviceName>\") " +
-        "@RestController " +
-        "public static class <serviceName>Controller {" +
-            "@ApiModel(description=\"Wrapper around the responses from <serviceName> to provide optional error information.\")" +
-            "public static class <responseWrapper>\\<T> {" +
-                "@ApiModelProperty(\"If present, the response from the method call. Null IFF error is present.\")"+
-                "public final T response;" +
-                "@ApiModelProperty(\"If present, the error encountered during the method call. Null IFF response is present.\")" +
-                "public final String error;" +
-                "private <responseWrapper>() { response = null; error = null; }" +
-                "private <responseWrapper>(T response, String error) { this.response = response; this.error = error; }" +
-                "static \\<T> <responseWrapper> success(T response) { return new <responseWrapper>(response, null); }" +
-                "static \\<T> <responseWrapper> error(String error) { return new <responseWrapper>(null, error); }" +
-            "}" +
-            "private <package>.<serviceName>Grpc.<serviceName>ImplBase service;" +
-            "public <serviceName>Controller(<package>.<serviceName>Grpc.<serviceName>ImplBase service) {" +
-                "this.service = service;" +
-            "}" +
-            // Individual method definitions
-            "<methodDefinitions>" +
-        "}";
+//    private static final String SERVICE_TEMPLATE =
+//        "@Api(value=\"/<serviceName>\") " +
+//        "@RestController " +
+//        "public static class <serviceName>Controller {" +
+//            "@ApiModel(description=\"Wrapper around the responses from <serviceName> to provide optional error information.\")" +
+//            "public static class <responseWrapper>\\<T> {" +
+//                "@ApiModelProperty(\"If present, the response from the method call. Null IFF error is present.\")"+
+//                "public final T response;" +
+//                "@ApiModelProperty(\"If present, the error encountered during the method call. Null IFF response is present.\")" +
+//                "public final String error;" +
+//                "private <responseWrapper>() { response = null; error = null; }" +
+//                "private <responseWrapper>(T response, String error) { this.response = response; this.error = error; }" +
+//                "static \\<T> <responseWrapper> success(T response) { return new <responseWrapper>(response, null); }" +
+//                "static \\<T> <responseWrapper> error(String error) { return new <responseWrapper>(null, error); }" +
+//            "}" +
+//            "private <package>.<serviceName>Grpc.<serviceName>ImplBase service;" +
+//            "public <serviceName>Controller(<package>.<serviceName>Grpc.<serviceName>ImplBase service) {" +
+//                "this.service = service;" +
+//            "}" +
+//            // Individual method definitions
+//            "<methodDefinitions>" +
+//        "}";
 
     private static final String SERVICE_METHOD_TEMPLATE =
         "\n@ApiOperation(value=\"<path>\",notes=<comments>)" +

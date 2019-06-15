@@ -12,6 +12,11 @@
  */
 package io.disc99.protoc.gen.spring.method;
 
+import com.github.jknack.handlebars.EscapingStrategy;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import com.google.api.HttpRule;
 import com.google.common.base.CaseFormat;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
@@ -24,6 +29,7 @@ import io.disc99.protoc.gen.spring.generator.MessageDescriptor;
 import io.disc99.protoc.gen.spring.generator.ServiceDescriptor;
 import io.disc99.protoc.gen.spring.generator.ServiceMethodDescriptor;
 import io.disc99.protoc.gen.spring.generator.ServiceMethodDescriptor.MethodType;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.ST;
@@ -249,7 +255,9 @@ public class MethodGenerator {
         private static final String REST_METHOD_NAME = "restMethodName";
         private static final String IS_REQUEST_JSON = "isRequestJson";
 
-        private final ST template;
+//        private final ST template;
+        private final Map<String, Object> context;
+
 
         MethodTemplate(@Nonnull final SpringMethodType springMethodType) {
             final MessageDescriptor inputDescriptor = serviceMethodDescriptor.getInputMessage();
@@ -258,25 +266,45 @@ public class MethodGenerator {
             final String requestBodyType = getBodyType(true);
             final String protoInputType = getProtoInputType();
             final String responseBodyType = responseWrapper + "<" + getBodyType(false) + ">";
-            this.template = SpringRestTemplates.serviceMethod()
-                .add("resultProto", outputDescriptor.getQualifiedOriginalName())
-                .add("resultType", outputDescriptor.getQualifiedName())
-                .add("responseWrapper", responseWrapper)
-                .add("requestProto", inputDescriptor.getQualifiedOriginalName())
-                .add("protoInputType", protoInputType)
-                .add("requestType", inputDescriptor.getQualifiedName())
-                .add("responseBodyType", responseBodyType)
-                .add("isClientStream", type == MethodType.BI_STREAM || type == MethodType.CLIENT_STREAM)
-                .add("isSingleResponse", type == MethodType.SIMPLE || type == MethodType.CLIENT_STREAM)
-                .add("comments", serviceMethodDescriptor.getComment())
-                .add("methodName", StringUtils.uncapitalize(serviceMethodDescriptor.getName()))
-                .add("methodType", springMethodType.getType())
-                .add("serviceName", serviceDescriptor.getName())
+
+            context = new HashMap<>();
+            context.put("resultProto", outputDescriptor.getQualifiedOriginalName());
+            context.put("resultType", outputDescriptor.getQualifiedName());
+            context.put("responseWrapper", responseWrapper);
+            context.put("requestProto", inputDescriptor.getQualifiedOriginalName());
+            context.put("protoInputType", protoInputType);
+            context.put("requestType", inputDescriptor.getQualifiedName());
+            context.put("responseBodyType", responseBodyType);
+            context.put("isClientStream", type == MethodType.BI_STREAM || type == MethodType.CLIENT_STREAM);
+            context.put("isSingleResponse", type == MethodType.SIMPLE || type == MethodType.CLIENT_STREAM);
+            context.put("comments", serviceMethodDescriptor.getComment());
+            context.put("methodName", StringUtils.uncapitalize(serviceMethodDescriptor.getName()));
+            context.put("methodType", springMethodType.getType());
+            context.put("serviceName", serviceDescriptor.getName());
                 // Defaults.
-                .add(IS_REQUEST_JSON, true)
-                .add(REQUEST_ARGS_NAME, "@RequestBody " + requestBodyType + " inputDto")
-                .add(PATH_NAME, "/" + serviceDescriptor.getName() + "/" + StringUtils.uncapitalize(serviceMethodDescriptor.getName()))
-                .add(REST_METHOD_NAME, StringUtils.uncapitalize(serviceMethodDescriptor.getName()));
+            context.put(IS_REQUEST_JSON, true);
+            context.put(REQUEST_ARGS_NAME, "@RequestBody " + requestBodyType + " inputDto");
+            context.put(PATH_NAME, "/" + serviceDescriptor.getName() + "/" + StringUtils.uncapitalize(serviceMethodDescriptor.getName()));
+            context.put(REST_METHOD_NAME, StringUtils.uncapitalize(serviceMethodDescriptor.getName()));;
+//            this.template = SpringRestTemplates.serviceMethod()
+//                .add("resultProto", outputDescriptor.getQualifiedOriginalName())
+//                .add("resultType", outputDescriptor.getQualifiedName())
+//                .add("responseWrapper", responseWrapper)
+//                .add("requestProto", inputDescriptor.getQualifiedOriginalName())
+//                .add("protoInputType", protoInputType)
+//                .add("requestType", inputDescriptor.getQualifiedName())
+//                .add("responseBodyType", responseBodyType)
+//                .add("isClientStream", type == MethodType.BI_STREAM || type == MethodType.CLIENT_STREAM)
+//                .add("isSingleResponse", type == MethodType.SIMPLE || type == MethodType.CLIENT_STREAM)
+//                .add("comments", serviceMethodDescriptor.getComment())
+//                .add("methodName", StringUtils.uncapitalize(serviceMethodDescriptor.getName()))
+//                .add("methodType", springMethodType.getType())
+//                .add("serviceName", serviceDescriptor.getName())
+//                // Defaults.
+//                .add(IS_REQUEST_JSON, true)
+//                .add(REQUEST_ARGS_NAME, "@RequestBody " + requestBodyType + " inputDto")
+//                .add(PATH_NAME, "/" + serviceDescriptor.getName() + "/" + StringUtils.uncapitalize(serviceMethodDescriptor.getName()))
+//                .add(REST_METHOD_NAME, StringUtils.uncapitalize(serviceMethodDescriptor.getName()));
             final String defaultPrepareInput;
             if (clientStream()) {
                 defaultPrepareInput = "input = inputDto.stream()" +
@@ -286,47 +314,65 @@ public class MethodGenerator {
                 defaultPrepareInput = "input = inputDto.toProto();";
             }
 
-            this.template.add(PREPARE_INPUT_NAME, defaultPrepareInput);
+//            this.template.add(PREPARE_INPUT_NAME, defaultPrepareInput);
+            context.put(PREPARE_INPUT_NAME, defaultPrepareInput);
         }
 
         @Nonnull
         public MethodTemplate setRequestArgs(@Nonnull final String requestArgsCode) {
-            this.template.remove(REQUEST_ARGS_NAME);
-            this.template.add(REQUEST_ARGS_NAME, requestArgsCode);
+            this.context.remove(REQUEST_ARGS_NAME);
+            this.context.put(REQUEST_ARGS_NAME, requestArgsCode);
+//            this.template.remove(REQUEST_ARGS_NAME);
+//            this.template.add(REQUEST_ARGS_NAME, requestArgsCode);
             return this;
         }
 
         @Nonnull
         public MethodTemplate setRequestToInput(@Nonnull final String requestToInputCode) {
-            this.template.remove(PREPARE_INPUT_NAME);
-            this.template.add(PREPARE_INPUT_NAME, requestToInputCode);
+            this.context.remove(PREPARE_INPUT_NAME);
+            this.context.put(PREPARE_INPUT_NAME, requestToInputCode);
+//            this.template.remove(PREPARE_INPUT_NAME);
+//            this.template.add(PREPARE_INPUT_NAME, requestToInputCode);
             return this;
         }
 
         @Nonnull
         public MethodTemplate setPath(@Nonnull final String path) {
-            this.template.remove(PATH_NAME);
-            this.template.add(PATH_NAME, path);
+            this.context.remove(PATH_NAME);
+            this.context.put(PATH_NAME, path);
+//            this.template.remove(PATH_NAME);
+//            this.template.add(PATH_NAME, path);
             return this;
         }
 
         @Nonnull
         public MethodTemplate setIsRequestJson(final boolean isRequestJson) {
-            this.template.remove(IS_REQUEST_JSON);
-            this.template.add(IS_REQUEST_JSON, isRequestJson);
+            this.context.remove(IS_REQUEST_JSON);
+            this.context.put(IS_REQUEST_JSON, isRequestJson);
+//            this.template.remove(IS_REQUEST_JSON);
+//            this.template.add(IS_REQUEST_JSON, isRequestJson);
             return this;
         }
 
         @Nonnull
         public MethodTemplate setRestMethodName(@Nonnull final String restMethodName) {
-            this.template.remove(REST_METHOD_NAME);
-            this.template.add(REST_METHOD_NAME, restMethodName);
+            this.context.remove(REST_METHOD_NAME);
+            this.context.put(REST_METHOD_NAME, restMethodName);
+//            this.template.remove(REST_METHOD_NAME);
+//            this.template.add(REST_METHOD_NAME, restMethodName);
             return this;
         }
 
         @Nonnull
+        @SneakyThrows // TODO
         public String render() {
-            return this.template.render();
+        TemplateLoader loader = new ClassPathTemplateLoader();
+        Handlebars handlebars = new Handlebars(loader).prettyPrint(true).with(EscapingStrategy.NOOP);
+
+        Template template = handlebars.compile("service_method");
+
+//            return this.template.render();
+            return template.apply(context);
         }
     }
 

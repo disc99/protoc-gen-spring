@@ -25,25 +25,6 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        new ProtocPluginCodeGenerator(){
-//            @Nonnull
-//            @Override
-//            protected String getPluginName() {
-//                return "p1";
-//            }
-//
-//            @Nonnull
-//            @Override
-//            protected String generatePluginJavaClass(@Nonnull String protoJavaClass) {
-//                return "pjc1";
-//            }
-//
-//            @Nonnull
-//            @Override
-//            protected String generateImports() {
-//                return "i1";
-//            }
-//        }.generate();;
         new Generator().generate();
 //        gen(args);
         return;

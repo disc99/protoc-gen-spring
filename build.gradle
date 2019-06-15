@@ -17,6 +17,10 @@ dependencies {
     compile "io.grpc:grpc-stub:1.19.0"
     compile 'com.github.jknack:handlebars:4.1.2'
 
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    compile group: 'org.antlr', name: 'ST4', version: '4.1'
+    compile group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.7'
+
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
     implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
 

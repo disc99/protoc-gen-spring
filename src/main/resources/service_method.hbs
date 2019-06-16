@@ -11,7 +11,7 @@ public ResponseEntity<{{responseBodyType}}> {{restMethodName}} ({{requestArgs}})
             "into the RestController. Check that a bean implementing {{serviceName}}ImplBase" +
         " exists in the Spring configuration."));
     }
-    // The plugin code should assign a value to this variable inside {{prepareInput}}\n
+    // The plugin code should assign a value to this variable inside {{prepareInput}}
     final {{protoInputType}} input;
     try {
         // Prepare the "input" field out of the request args.

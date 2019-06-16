@@ -1,0 +1,11 @@
+@ApiModelProperty(required={{isRequired}},
+        name="{{displayName}}",
+        value=
+        {{#if hasOneOf }}"This field belongs to the oneof group: {{oneof}}." +
+        "Only one field in the group should be set, or else weird things will happen." +
+        {{/if}}
+        {{comment}})
+@SerializedName(value="{{displayName}}")
+@JsonProperty(value="{{displayName}}")
+public {{type}} {{name}} = null;
+

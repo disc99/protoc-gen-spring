@@ -19,7 +19,6 @@ import io.disc99.protoc.gen.spring.method.MethodGenerator;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.stringtemplate.v4.ST;
 
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
@@ -71,24 +70,48 @@ class Generator extends ProtocPluginCodeGenerator {
      */
     @Override
     @Nonnull
+    @SneakyThrows
     protected Optional<String> generateEnumCode(@Nonnull final EnumDescriptor enumDescriptor) {
-        return Optional.of(SpringRestTemplates.enumerator()
-                .add("enumName", enumDescriptor.getName())
-                .add("comment", enumDescriptor.getComment())
-                .add("originalProtoType", enumDescriptor.getQualifiedOriginalName())
-                .add("values", enumDescriptor.getValues().entrySet().stream()
-                        .map(valueEntry -> {
-                            String valueTemplate =
-                                    "@ApiModelProperty(value=<comment>)" +
-                                            "<name>(<value>)";
-                            ST valueMsg = new ST(valueTemplate);
-                            valueMsg.add("comment", enumDescriptor.getValueComment(valueEntry.getKey()));
-                            valueMsg.add("name", valueEntry.getKey());
-                            valueMsg.add("value", valueEntry.getValue());
-                            return valueMsg.render();
-                        })
-                        .collect(Collectors.toList()))
-                .render());
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("enumName", enumDescriptor.getName());
+        context.put("comment", enumDescriptor.getComment());
+        context.put("originalProtoType", enumDescriptor.getQualifiedOriginalName());
+        context.put("values", enumDescriptor.getValues().entrySet().stream()
+                .map(valueEntry -> {
+                    HashMap<String, Object> value = new HashMap<>();
+                    value.put("comment", enumDescriptor.getValueComment(valueEntry.getKey()));
+                    value.put("name", valueEntry.getKey());
+                    value.put("value", valueEntry.getValue());
+                    return value;
+//                    String valueTemplate =
+//                            "@ApiModelProperty(value=<comment>)" +
+//                                    "<name>(<value>)";
+//                    ST valueMsg = new ST(valueTemplate);
+//                    valueMsg.add("comment", enumDescriptor.getValueComment(valueEntry.getKey()));
+//                    valueMsg.add("name", valueEntry.getKey());
+//                    valueMsg.add("value", valueEntry.getValue());
+//                    return valueMsg.render();
+                })
+                .collect(Collectors.toList()));
+
+        return Optional.of(template("enumerator").apply(context));
+//        return Optional.of(SpringRestTemplates.enumerator()
+//                .add("enumName", enumDescriptor.getName())
+//                .add("comment", enumDescriptor.getComment())
+//                .add("originalProtoType", enumDescriptor.getQualifiedOriginalName())
+//                .add("values", enumDescriptor.getValues().entrySet().stream()
+//                        .map(valueEntry -> {
+//                            String valueTemplate =
+//                                    "@ApiModelProperty(value=<comment>)" +
+//                                            "<name>(<value>)";
+//                            ST valueMsg = new ST(valueTemplate);
+//                            valueMsg.add("comment", enumDescriptor.getValueComment(valueEntry.getKey()));
+//                            valueMsg.add("name", valueEntry.getKey());
+//                            valueMsg.add("value", valueEntry.getValue());
+//                            return valueMsg.render();
+//                        })
+//                        .collect(Collectors.toList()))
+//                .render());
     }
 
     /**
@@ -126,6 +149,7 @@ class Generator extends ProtocPluginCodeGenerator {
      */
     @Override
     @Nonnull
+    @SneakyThrows // TODO
     protected Optional<String> generateMessageCode(@Nonnull final MessageDescriptor messageDescriptor) {
         final Map<Integer, String> oneofNameMap = new HashMap<>();
         final DescriptorProto descriptorProto = messageDescriptor.getDescriptorProto();
@@ -133,46 +157,84 @@ class Generator extends ProtocPluginCodeGenerator {
             oneofNameMap.put(i, descriptorProto.getOneofDecl(i).getName());
         }
 
-        return Optional.of(SpringRestTemplates.message()
-                .add("comment", messageDescriptor.getComment())
-                .add("className", messageDescriptor.getName())
-                .add("originalProtoType", messageDescriptor.getQualifiedOriginalName())
-                .add("nestedDefinitions", messageDescriptor.getNestedMessages().stream()
-                        .filter(nestedDescriptor -> !(nestedDescriptor instanceof MessageDescriptor &&
-                                ((MessageDescriptor) nestedDescriptor).isMapEntry()))
-                        .map(this::generateCode)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .add("fieldDeclarations", messageDescriptor.getFieldDescriptors().stream()
-                        .map(descriptor -> generateFieldDeclaration(descriptor, oneofNameMap))
-                        .collect(Collectors.toList()))
-                .add("setBuilderFields", messageDescriptor.getFieldDescriptors().stream()
-                        .map(this::addFieldToProtoBuilder)
-                        .collect(Collectors.toList()))
-                .add("setMsgFields", messageDescriptor.getFieldDescriptors().stream()
-                        .map(descriptor -> addFieldSetFromProto(descriptor, "newMsg"))
-                        .collect(Collectors.toList()))
-                .render());
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("comment", messageDescriptor.getComment());
+        context.put("className", messageDescriptor.getName());
+        context.put("originalProtoType", messageDescriptor.getQualifiedOriginalName());
+        context.put("nestedDefinitions", messageDescriptor.getNestedMessages().stream()
+                .filter(nestedDescriptor -> !(nestedDescriptor instanceof MessageDescriptor &&
+                        ((MessageDescriptor) nestedDescriptor).isMapEntry()))
+                .map(this::generateCode)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList()));
+        context.put("fieldDeclarations", messageDescriptor.getFieldDescriptors().stream()
+                .map(descriptor -> generateFieldDeclaration(descriptor, oneofNameMap))
+                .collect(Collectors.toList()));
+        context.put("setBuilderFields", messageDescriptor.getFieldDescriptors().stream()
+                .map(this::addFieldToProtoBuilder)
+                .collect(Collectors.toList()));
+        context.put("setMsgFields", messageDescriptor.getFieldDescriptors().stream()
+                .map(descriptor -> addFieldSetFromProto(descriptor, "newMsg"))
+                .collect(Collectors.toList()));
+
+        return Optional.of(template("message").apply(context));
+
+//        return Optional.of(SpringRestTemplates.message()
+//                .add("comment", messageDescriptor.getComment())
+//                .add("className", messageDescriptor.getName())
+//                .add("originalProtoType", messageDescriptor.getQualifiedOriginalName())
+//                .add("nestedDefinitions", messageDescriptor.getNestedMessages().stream()
+//                        .filter(nestedDescriptor -> !(nestedDescriptor instanceof MessageDescriptor &&
+//                                ((MessageDescriptor) nestedDescriptor).isMapEntry()))
+//                        .map(this::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()))
+//                .add("fieldDeclarations", messageDescriptor.getFieldDescriptors().stream()
+//                        .map(descriptor -> generateFieldDeclaration(descriptor, oneofNameMap))
+//                        .collect(Collectors.toList()))
+//                .add("setBuilderFields", messageDescriptor.getFieldDescriptors().stream()
+//                        .map(this::addFieldToProtoBuilder)
+//                        .collect(Collectors.toList()))
+//                .add("setMsgFields", messageDescriptor.getFieldDescriptors().stream()
+//                        .map(descriptor -> addFieldSetFromProto(descriptor, "newMsg"))
+//                        .collect(Collectors.toList()))
+//                .render());
     }
 
     @Nonnull
+    @SneakyThrows
     private String generateFieldDeclaration(@Nonnull final FieldDescriptor fieldDescriptor,
                                             @Nonnull final Map<Integer, String> oneofNameMap) {
-        final ST template = SpringRestTemplates.fieldDeclaration()
-                .add("type", fieldDescriptor.getType())
-                .add("displayName", fieldDescriptor.getName())
-                .add("name", fieldDescriptor.getSuffixedName())
-                .add("isRequired", fieldDescriptor.getProto().getLabel() == Label.LABEL_REQUIRED)
-                .add("comment", fieldDescriptor.getComment());
+        HashMap<String, Object> context = new HashMap<>();
+
+
+        context.put("type", fieldDescriptor.getType());
+        context.put("displayName", fieldDescriptor.getName());
+        context.put("name", fieldDescriptor.getSuffixedName());
+        context.put("isRequired", fieldDescriptor.getProto().getLabel() == Label.LABEL_REQUIRED);
+        context.put("comment", fieldDescriptor.getComment());
+
+//        final ST template = SpringRestTemplates.fieldDeclaration()
+//                .add("type", fieldDescriptor.getType())
+//                .add("displayName", fieldDescriptor.getName())
+//                .add("name", fieldDescriptor.getSuffixedName())
+//                .add("isRequired", fieldDescriptor.getProto().getLabel() == Label.LABEL_REQUIRED)
+//                .add("comment", fieldDescriptor.getComment());
         if (fieldDescriptor.getProto().hasOneofIndex()) {
-            template.add("hasOneOf", true);
-            template.add("oneof", FieldDescriptor.formatFieldName(
+            context.put("hasOneOf", true);
+            context.put("oneof", FieldDescriptor.formatFieldName(
                     oneofNameMap.get(fieldDescriptor.getProto().getOneofIndex())));
+//            template.add("hasOneOf", true);
+//            template.add("oneof", FieldDescriptor.formatFieldName(
+//                    oneofNameMap.get(fieldDescriptor.getProto().getOneofIndex())));
         } else {
-            template.add("hasOneOf", false);
+            context.put("hasOneOf", false);
+//            template.add("hasOneOf", false);
         }
-        return template.render();
+        return template("field_decl_template").apply(context);
+//        return template.render();
     }
 
     /**
@@ -182,20 +244,34 @@ class Generator extends ProtocPluginCodeGenerator {
      * @return The generated code string.
      */
     @Nonnull
+    @SneakyThrows
     private String addFieldToProtoBuilder(@Nonnull final FieldDescriptor fieldDescriptor) {
-        final ST template = SpringRestTemplates.addFieldToProtoBuilder()
-                .add("name", fieldDescriptor.getSuffixedName())
-                .add("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()))
-                .add("isList", fieldDescriptor.isList())
-                .add("isMsg", fieldDescriptor.getContentMessage().isPresent())
-                .add("isMap", fieldDescriptor.isMapField());
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("name", fieldDescriptor.getSuffixedName());
+        context.put("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()));
+        context.put("isList", fieldDescriptor.isList());
+        context.put("isMsg", fieldDescriptor.getContentMessage().isPresent());
+        context.put("isMap", fieldDescriptor.isMapField());;
+
+
+//        final ST template = SpringRestTemplates.addFieldToProtoBuilder()
+//                .add("name", fieldDescriptor.getSuffixedName())
+//                .add("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()))
+//                .add("isList", fieldDescriptor.isList())
+//                .add("isMsg", fieldDescriptor.getContentMessage().isPresent())
+//                .add("isMap", fieldDescriptor.isMapField());
+
         if (fieldDescriptor.isMapField()) {
             FieldDescriptor value = fieldDescriptor.getContentMessage()
                     .map(descriptor -> ((MessageDescriptor) descriptor).getMapValue())
                     .orElseThrow(() -> new IllegalStateException("Content message not present in map field."));
-            template.add("isMapMsg", value.getContentMessage().isPresent());
+
+            context.put("isMapMsg", value.getContentMessage().isPresent());
+//            template.add("isMapMsg", value.getContentMessage().isPresent());
+
         }
-        return template.render();
+        return template("add_field_to_proto_builder").apply(context);
+//        return template.render();
     }
 
     /**
@@ -206,31 +282,50 @@ class Generator extends ProtocPluginCodeGenerator {
      * @return The generated code string.
      */
     @Nonnull
+    @SneakyThrows
     private String addFieldSetFromProto(@Nonnull final FieldDescriptor fieldDescriptor,
                                         @Nonnull final String msgName) {
-        final ST template = SpringRestTemplates.setFieldFromProto()
-                .add("isMsg", fieldDescriptor.getContentMessage().isPresent())
-                .add("isProto3", fieldDescriptor.isProto3Syntax())
-                .add("msgName", msgName)
-                .add("fieldName", fieldDescriptor.getSuffixedName())
-                .add("fieldNumber", fieldDescriptor.getProto().getNumber())
-                .add("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()))
-                .add("msgType", fieldDescriptor.getTypeName())
-                .add("isList", fieldDescriptor.isList())
-                .add("isMap", fieldDescriptor.isMapField())
-                .add("isOneOf", fieldDescriptor.getOneofName().isPresent());
+        HashMap<String, Object> context = new HashMap<>();
+
+        context.put("isMsg", fieldDescriptor.getContentMessage().isPresent());
+        context.put("isProto3", fieldDescriptor.isProto3Syntax());
+        context.put("msgName", msgName);
+        context.put("fieldName", fieldDescriptor.getSuffixedName());
+        context.put("fieldNumber", fieldDescriptor.getProto().getNumber());
+        context.put("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()));
+        context.put("msgType", fieldDescriptor.getTypeName());
+        context.put("isList", fieldDescriptor.isList());
+        context.put("isMap", fieldDescriptor.isMapField());
+        context.put("isOneOf", fieldDescriptor.getOneofName().isPresent());
+
+//        final ST template = SpringRestTemplates.setFieldFromProto()
+//                .add("isMsg", fieldDescriptor.getContentMessage().isPresent())
+//                .add("isProto3", fieldDescriptor.isProto3Syntax())
+//                .add("msgName", msgName)
+//                .add("fieldName", fieldDescriptor.getSuffixedName())
+//                .add("fieldNumber", fieldDescriptor.getProto().getNumber())
+//                .add("capProtoName", StringUtils.capitalize(fieldDescriptor.getName()))
+//                .add("msgType", fieldDescriptor.getTypeName())
+//                .add("isList", fieldDescriptor.isList())
+//                .add("isMap", fieldDescriptor.isMapField())
+//                .add("isOneOf", fieldDescriptor.getOneofName().isPresent());
 
         fieldDescriptor.getOneofName().ifPresent(oneOfName ->
-                template.add("oneOfName", StringUtils.capitalize(oneOfName)));
+                context.put("oneOfName", StringUtils.capitalize(oneOfName)));
+//        fieldDescriptor.getOneofName().ifPresent(oneOfName ->
+//                template.add("oneOfName", StringUtils.capitalize(oneOfName)));
 
         if (fieldDescriptor.isMapField()) {
             FieldDescriptor value = fieldDescriptor.getContentMessage()
                     .map(descriptor -> ((MessageDescriptor) descriptor).getMapValue())
                     .orElseThrow(() -> new IllegalStateException("Content message not present in map field."));
-            template.add("isMapMsg", value.getContentMessage().isPresent());
-            template.add("mapValType", value.getTypeName());
+            context.put("isMapMsg", value.getContentMessage().isPresent());
+            context.put("mapValType", value.getTypeName());
+//            template.add("isMapMsg", value.getContentMessage().isPresent());
+//            template.add("mapValType", value.getTypeName());
         }
 
-        return template.render();
+        return template("set_field_from_proto_template").apply(context);
+//        return template.render();
     }
 }

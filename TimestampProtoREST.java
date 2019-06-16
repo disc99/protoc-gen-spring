@@ -131,9 +131,11 @@ public class TimestampProtoREST {
       if (seconds_ != null) {
         builder.setSeconds(seconds_);
       }
+
       if (nanos_ != null) {
         builder.setNanos(nanos_);
       }
+
       return builder.build();
     }
 
@@ -141,6 +143,7 @@ public class TimestampProtoREST {
       Timestamp newMsg = new Timestamp();
       newMsg.seconds_ = input.getSeconds();
       newMsg.nanos_ = input.getNanos();
+
       return newMsg;
     }
   }

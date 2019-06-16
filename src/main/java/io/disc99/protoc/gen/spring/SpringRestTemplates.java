@@ -29,11 +29,11 @@ public class SpringRestTemplates {
 //    public static ST service() {
 //        return new ST(SERVICE_TEMPLATE);
 //    }
-
-    public static ST serviceMethod() {
-        return new ST(SERVICE_METHOD_TEMPLATE);
-    }
-
+//
+//    public static ST serviceMethod() {
+//        return new ST(SERVICE_METHOD_TEMPLATE);
+//    }
+//
     public static ST message() {
         return new ST(MESSAGE_TEMPLATE);
     }
@@ -113,87 +113,87 @@ public class SpringRestTemplates {
 //            // Individual method definitions
 //            "<methodDefinitions>" +
 //        "}";
-
-    private static final String SERVICE_METHOD_TEMPLATE =
-        "\n@ApiOperation(value=\"<path>\",notes=<comments>)" +
-        "@RequestMapping(path=\"<path>\",method=<methodType>,"+
-        "<if(isRequestJson)>" +
-            "consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE}," +
-        "<endif>" +
-        "produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})" +
-        "public ResponseEntity\\<<responseBodyType>> <restMethodName> (<requestArgs>) {" +
-            "if (service == null) {" +
-                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                    ".body(<responseWrapper>.error(\"The service <serviceName> was not injected " +
-                    "into the RestController. Check that a bean implementing <serviceName>ImplBase" +
-                    " exists in the Spring configuration.\"));" +
-            "}" +
-            "// The plugin code should assign a value to this variable inside \\<prepareInput\\>\n" +
-            "final <protoInputType> input;" +
-            "try {" +
-                // Prepare the "input" field out of the request args.
-                // If the "input" field does not get set here, there will be a compilation error.
-                "<prepareInput>" +
-            "} catch (RuntimeException e) {" +
-                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                    ".body(<responseWrapper>.error(\"Failed to prepare input for method <methodName>: \" + e.getMessage()));" +
-            "}" +
-            "List\\<<resultType>> responseList = new ArrayList\\<>();" +
-            "LinkedBlockingQueue\\<Status> statusQueue = new LinkedBlockingQueue\\<>(1);" +
-            "StreamObserver\\<<resultProto>> responseObserver = new StreamObserver\\<<resultProto>>() {" +
-                "@Override " +
-                "public void onNext(<resultProto> value) {" +
-                    "responseList.add(<resultType>.fromProto(value));" +
-                "}" +
-                "@Override " +
-                "public void onError(Throwable t) {" +
-                    "statusQueue.offer(Status.fromThrowable(t));" +
-                "}" +
-                "@Override " +
-                "public void onCompleted() {" +
-                    "statusQueue.offer(Status.OK);" +
-                "}" +
-            "};" +
-
-            "try {" +
-                "<if(isClientStream)>" +
-                    "StreamObserver\\<<requestProto>> requestObserver = service.<methodName>(responseObserver);" +
-                    "try {" +
-                        "input.stream().forEach(requestObserver::onNext);" +
-                        "requestObserver.onCompleted();" +
-                    "} catch (Exception e) {" +
-                        "requestObserver.onError(e);" +
-                        "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                            ".body(<responseWrapper>.error(\"Error during input processing: \" + e.getMessage()));" +
-                    "}" +
-                "<else>" +
-                    "service.<methodName>(input, responseObserver);" +
-                "<endif>" +
-            "} catch (RuntimeException e) {" +
-                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                ".body(<responseWrapper>.error(\"The method <methodName> returned an exception: \" + e.getMessage()));" +
-            "}" +
-
-            "\ntry {" +
-                "Status status = statusQueue.take();" +
-                "if (status.isOk()) {" +
-                    "return ResponseEntity.ok(<responseWrapper>.success(responseList<if(isSingleResponse)>.get(0)<endif>));" +
-                "} else if (status.getDescription() != null) {" +
-                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                        ".body(<responseWrapper>.error(status.getDescription()));" +
-                "} else if (status.getCause() != null) {" +
-                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                        ".body(<responseWrapper>.error(status.getCause().getMessage()));" +
-                "} else {" +
-                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                        ".body(<responseWrapper>.error(\"Unknown error... Sorry.\"));" +
-                "}" +
-            "} catch (InterruptedException e) {" +
-                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
-                    ".body(<responseWrapper>.error(\"Interrupted while waiting for gRPC call to complete.\"));" +
-            "}" +
-        "}";
-
+//
+//    private static final String SERVICE_METHOD_TEMPLATE =
+//        "\n@ApiOperation(value=\"<path>\",notes=<comments>)" +
+//        "@RequestMapping(path=\"<path>\",method=<methodType>,"+
+//        "<if(isRequestJson)>" +
+//            "consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE}," +
+//        "<endif>" +
+//        "produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})" +
+//        "public ResponseEntity\\<<responseBodyType>> <restMethodName> (<requestArgs>) {" +
+//            "if (service == null) {" +
+//                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                    ".body(<responseWrapper>.error(\"The service <serviceName> was not injected " +
+//                    "into the RestController. Check that a bean implementing <serviceName>ImplBase" +
+//                    " exists in the Spring configuration.\"));" +
+//            "}" +
+//            "// The plugin code should assign a value to this variable inside \\<prepareInput\\>\n" +
+//            "final <protoInputType> input;" +
+//            "try {" +
+//                // Prepare the "input" field out of the request args.
+//                // If the "input" field does not get set here, there will be a compilation error.
+//                "<prepareInput>" +
+//            "} catch (RuntimeException e) {" +
+//                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                    ".body(<responseWrapper>.error(\"Failed to prepare input for method <methodName>: \" + e.getMessage()));" +
+//            "}" +
+//            "List\\<<resultType>> responseList = new ArrayList\\<>();" +
+//            "LinkedBlockingQueue\\<Status> statusQueue = new LinkedBlockingQueue\\<>(1);" +
+//            "StreamObserver\\<<resultProto>> responseObserver = new StreamObserver\\<<resultProto>>() {" +
+//                "@Override " +
+//                "public void onNext(<resultProto> value) {" +
+//                    "responseList.add(<resultType>.fromProto(value));" +
+//                "}" +
+//                "@Override " +
+//                "public void onError(Throwable t) {" +
+//                    "statusQueue.offer(Status.fromThrowable(t));" +
+//                "}" +
+//                "@Override " +
+//                "public void onCompleted() {" +
+//                    "statusQueue.offer(Status.OK);" +
+//                "}" +
+//            "};" +
+//
+//            "try {" +
+//                "<if(isClientStream)>" +
+//                    "StreamObserver\\<<requestProto>> requestObserver = service.<methodName>(responseObserver);" +
+//                    "try {" +
+//                        "input.stream().forEach(requestObserver::onNext);" +
+//                        "requestObserver.onCompleted();" +
+//                    "} catch (Exception e) {" +
+//                        "requestObserver.onError(e);" +
+//                        "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                            ".body(<responseWrapper>.error(\"Error during input processing: \" + e.getMessage()));" +
+//                    "}" +
+//                "<else>" +
+//                    "service.<methodName>(input, responseObserver);" +
+//                "<endif>" +
+//            "} catch (RuntimeException e) {" +
+//                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                ".body(<responseWrapper>.error(\"The method <methodName> returned an exception: \" + e.getMessage()));" +
+//            "}" +
+//
+//            "\ntry {" +
+//                "Status status = statusQueue.take();" +
+//                "if (status.isOk()) {" +
+//                    "return ResponseEntity.ok(<responseWrapper>.success(responseList<if(isSingleResponse)>.get(0)<endif>));" +
+//                "} else if (status.getDescription() != null) {" +
+//                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                        ".body(<responseWrapper>.error(status.getDescription()));" +
+//                "} else if (status.getCause() != null) {" +
+//                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                        ".body(<responseWrapper>.error(status.getCause().getMessage()));" +
+//                "} else {" +
+//                    "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                        ".body(<responseWrapper>.error(\"Unknown error... Sorry.\"));" +
+//                "}" +
+//            "} catch (InterruptedException e) {" +
+//                "return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)" +
+//                    ".body(<responseWrapper>.error(\"Interrupted while waiting for gRPC call to complete.\"));" +
+//            "}" +
+//        "}";
+//
     private static final String MESSAGE_TEMPLATE =
        "@ApiModel(value=\"<className>\", <if(comment)>description=<comment><endif>)" +
        "public static class <className> {" +

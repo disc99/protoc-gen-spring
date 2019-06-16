@@ -23,7 +23,6 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type;
 import com.google.protobuf.TextFormat;
 import io.disc99.protoc.gen.spring.PathTemplate;
-import io.disc99.protoc.gen.spring.SpringRestTemplates;
 import io.disc99.protoc.gen.spring.generator.FieldDescriptor;
 import io.disc99.protoc.gen.spring.generator.MessageDescriptor;
 import io.disc99.protoc.gen.spring.generator.ServiceDescriptor;
@@ -32,7 +31,6 @@ import io.disc99.protoc.gen.spring.generator.ServiceMethodDescriptor.MethodType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.stringtemplate.v4.ST;
 
 import javax.annotation.Nonnull;
 import java.util.*;

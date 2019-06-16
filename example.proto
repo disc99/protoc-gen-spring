@@ -14,8 +14,22 @@ service EchoService {
 message EchoRequest {
     string message = 1;
     google.protobuf.Timestamp time = 2;
+    map<int32, string> map_field = 3;
+    oneof test_oneof {
+        string name = 4;
+        int32 num = 5;
+    }
+    message Sub {
+        string text = 1;
+    }
+    Sub sub = 6;
 }
 
 message EchoResponse {
     string message = 1;
+}
+
+enum Type {
+    RED = 0;
+    BLUE = 1;
 }

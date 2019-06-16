@@ -161,61 +161,61 @@ class FileDescriptorProcessingContext {
         TemplateLoader loader = new ClassPathTemplateLoader();
         Handlebars handlebars = new Handlebars(loader).prettyPrint(true).with(EscapingStrategy.NOOP);
 
-//        Template template = handlebars.compile("file");
-//        HashMap<String, Object> context = new HashMap<>();
-//        context.put("pluginName", generator.getPluginName());
-//        context.put("imports", generator.generateImports());
-//        context.put("protoSourceName", fileDescriptorProto.getName());
-//        context.put("pkgName", javaPkg);
-//        context.put("outerClassName", outerClass.getPluginJavaClass());
-//        context.put("messageCode", fileDescriptorProto.getMessageTypeList().stream()
-//                        .map(message -> registry.getMessageDescriptor(message.getName()))
-//                        .map(generator::generateCode)
-//                        .filter(Optional::isPresent)
-//                        .map(Optional::get)
-//                        .collect(Collectors.toList()));
-//        context.put("enumCode", fileDescriptorProto.getEnumTypeList().stream()
-//                        .map(message -> registry.getMessageDescriptor(message.getName()))
-//                        .map(generator::generateCode)
-//                        .filter(Optional::isPresent)
-//                        .map(Optional::get)
-//                        .collect(Collectors.toList()));
-//        context.put("serviceCode", fileDescriptorProto.getServiceList().stream()
-//                        .map(message -> registry.getMessageDescriptor(message.getName()))
-//                        .map(generator::generateCode)
-//                        .filter(Optional::isPresent)
-//                        .map(Optional::get)
-//                        .collect(Collectors.toList()));
-
-
-//        final String generatedFile = template.apply(context);
-
-
-        final String generatedFile = Templates.file()
-                .add("pluginName", generator.getPluginName())
-                .add("imports", generator.generateImports())
-                .add("protoSourceName", fileDescriptorProto.getName())
-                .add("pkgName", javaPkg)
-                .add("outerClassName", outerClass.getPluginJavaClass())
-                .add("messageCode", fileDescriptorProto.getMessageTypeList().stream()
+        Template template = handlebars.compile("file");
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("pluginName", generator.getPluginName());
+        context.put("imports", generator.generateImports());
+        context.put("protoSourceName", fileDescriptorProto.getName());
+        context.put("pkgName", javaPkg);
+        context.put("outerClassName", outerClass.getPluginJavaClass());
+        context.put("messageCode", fileDescriptorProto.getMessageTypeList().stream()
                         .map(message -> registry.getMessageDescriptor(message.getName()))
                         .map(generator::generateCode)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .add("enumCode", fileDescriptorProto.getEnumTypeList().stream()
+                        .collect(Collectors.toList()));
+        context.put("enumCode", fileDescriptorProto.getEnumTypeList().stream()
                         .map(message -> registry.getMessageDescriptor(message.getName()))
                         .map(generator::generateCode)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .add("serviceCode", fileDescriptorProto.getServiceList().stream()
+                        .collect(Collectors.toList()));
+        context.put("serviceCode", fileDescriptorProto.getServiceList().stream()
                         .map(message -> registry.getMessageDescriptor(message.getName()))
                         .map(generator::generateCode)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .render();
+                        .collect(Collectors.toList()));
+
+
+        final String generatedFile = template.apply(context);
+
+
+//        final String generatedFile = Templates.file()
+//                .add("pluginName", generator.getPluginName())
+//                .add("imports", generator.generateImports())
+//                .add("protoSourceName", fileDescriptorProto.getName())
+//                .add("pkgName", javaPkg)
+//                .add("outerClassName", outerClass.getPluginJavaClass())
+//                .add("messageCode", fileDescriptorProto.getMessageTypeList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()))
+//                .add("enumCode", fileDescriptorProto.getEnumTypeList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()))
+//                .add("serviceCode", fileDescriptorProto.getServiceList().stream()
+//                        .map(message -> registry.getMessageDescriptor(message.getName()))
+//                        .map(generator::generateCode)
+//                        .filter(Optional::isPresent)
+//                        .map(Optional::get)
+//                        .collect(Collectors.toList()))
+//                .render();
 
         // Run the formatter to pretty-print the code.
         log.info("Running formatter...");
